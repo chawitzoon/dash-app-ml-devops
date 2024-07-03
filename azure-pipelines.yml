@@ -1,0 +1,82 @@
+# Trigger the pipeline on every push to the main branch
+trigger:
+- main
+
+# Define the pool of agents to use
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Web app name
+  # webAppName: 'tbd'
+
+  # Environment name
+  # environmentName: 'tbd'
+
+  # Project root folder. Point to the folder containing manage.py file.
+  projectRoot: $(System.DefaultWorkingDirectory)
+  
+  # Python version: 3.8
+  pythonVersion: '3.8'
+
+
+# Define stages in the pipeline
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+        addToPath: true
+      displayName: 'Use Python $(pythonVersion)'
+
+    - script: |
+        python -m venv antenv
+        source antenv/bin/activate
+        make install
+      workingDirectory: $(projectRoot)
+      displayName: 'Install dependencies'
+
+    - script: |
+        # python -m venv antenv
+        # source antenv/bin/activate
+        make lint
+      workingDirectory: $(projectRoot)
+      displayName: 'Run lint tests'
+
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'drop'
+
+- stage: Test
+  dependsOn: Build
+  jobs:
+  - job: TestJob
+    steps:
+    - download: current
+      artifact: drop
+
+    - script: |
+        source antenv/bin/activate
+        make test
+      displayName: 'Run tests'
+
+# - stage: Deploy
+#   dependsOn: Test
+#   condition: succeeded()
+#   jobs:
+#   - deployment: Deploy
+#     environment: 'production'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - download: current
+#             artifact: drop
+
+#           - script: |
+#               source antenv/bin/activate
+#               # Add deployment script here
+#             displayName: 'Deploy application'
