@@ -19,7 +19,6 @@ variables:
   # Python version: 3.8
   pythonVersion: '3.8'
 
-
 # Define stages in the pipeline
 stages:
 - stage: Build
@@ -41,26 +40,30 @@ stages:
       displayName: 'Install dependencies'
 
     - script: |
-        # python -m venv antenv
-        # source antenv/bin/activate
         make lint
       workingDirectory: $(projectRoot)
       displayName: 'Run lint tests'
 
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: 'drop'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'drop'
+      displayName: 'Publish Artifact'
 
 - stage: Test
   dependsOn: Build
   jobs:
   - job: TestJob
     steps:
-    - download: current
-      artifact: drop
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'drop'
+      displayName: 'Download Artifact'
 
     - script: |
         source antenv/bin/activate
         make test
+      workingDirectory: $(projectRoot)
       displayName: 'Run tests'
 
 # - stage: Deploy
@@ -73,8 +76,10 @@ stages:
 #       runOnce:
 #         deploy:
 #           steps:
-#           - download: current
-#             artifact: drop
+#           - task: DownloadPipelineArtifact@2
+#             inputs:
+#               artifact: 'drop'
+#             displayName: 'Download Artifact'
 
 #           - script: |
 #               source antenv/bin/activate
