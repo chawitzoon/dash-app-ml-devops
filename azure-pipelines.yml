@@ -29,7 +29,6 @@ stages:
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(pythonVersion)'
-        addToPath: true
       displayName: 'Use Python $(pythonVersion)'
 
     - script: |
@@ -40,27 +39,24 @@ stages:
       displayName: 'Install dependencies'
 
     - script: |
+        python -m venv antenv
+        source antenv/bin/activate
         make lint
       workingDirectory: $(projectRoot)
       displayName: 'Run lint tests'
-
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'drop'
-      displayName: 'Publish Artifact'
 
 - stage: Test
   dependsOn: Build
   jobs:
   - job: TestJob
     steps:
-    - task: DownloadPipelineArtifact@2
+    - task: UsePythonVersion@0
       inputs:
-        artifact: 'drop'
-      displayName: 'Download Artifact'
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
 
     - script: |
+        python -m venv antenv
         source antenv/bin/activate
         make test
       workingDirectory: $(projectRoot)
