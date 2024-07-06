@@ -58,6 +58,7 @@ stages:
     - script: |
         python -m venv antenv
         source antenv/bin/activate
+        make install
         make test
       workingDirectory: $(projectRoot)
       displayName: 'Run tests'
