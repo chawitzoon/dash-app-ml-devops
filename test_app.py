@@ -1,22 +1,21 @@
-from app import helloworld, add, subtract
+import pytest
+from app import app
 
 
-def setup_function(function):
-    print(" Running Setup: %s " % function.__name__)
-    function.x = 10
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        with app.app_context():
+            yield client
 
 
-def teardown_function(function):
-    print(" Running Teardown:%s" % function.__name__)
-    del function.x
+def test_home(client):
+    response = client.get("/")
+    assert response.status_code == 200
+    assert b"App Home: From Azure Pipelines (Continuous Delivery)" in response.data
 
 
-### Run to see failed test
-#def test_hello_add():
-#    assert add(test_hello_add.x) == 12
-
-def test_hello_add():
-    assert add(test_hello_add.x) == 11
-
-def test_hello_subtract():
-    assert subtract(test_hello_subtract.x) == 9
+def test_predict(client):
+    response = client.post("/predict", json={"input": "test string"})
+    assert response.status_code == 200
+    assert response.get_json() == {"prediction": "Processed input: test string"}
