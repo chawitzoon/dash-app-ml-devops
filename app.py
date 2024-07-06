@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask.logging import create_logger
 import logging
-import traceback
 
 app = Flask(__name__)
 LOG = create_logger(app)
@@ -16,6 +15,7 @@ def home():
     return html.format(format)
 
 
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.json
@@ -23,9 +23,15 @@ def predict():
         # For testing, return the input string
         prediction = f'Processed input: {input_str}'
         return jsonify({"prediction": prediction})
+    except KeyError as e:
+        LOG.error("KeyError: %s", e)
+        return jsonify({"error": "KeyError occurred"}), 400
+    except TypeError as e:
+        LOG.error("TypeError: %s", e)
+        return jsonify({"error": "TypeError occurred"}), 400
     except Exception as e:
-        LOG.error(f"Error processing input: {e}")
-        return jsonify({"error": str(e)}), 400
+        LOG.error("Unexpected error: %s", e)
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 
 if __name__ == "__main__":
