@@ -56,23 +56,10 @@ stages:
       workingDirectory: $(projectRoot)
       displayName: 'Run lint tests and format'
 
-- stage: Test
-  displayName: Test stage
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - job: BuildJob
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(pythonVersion)'
-      displayName: 'Use Python $(pythonVersion)'
-
     - script: |
         python -m venv antenv
         source antenv/bin/activate
+        make install
         make test
       workingDirectory: $(projectRoot)
       displayName: 'Run tests'
@@ -92,7 +79,7 @@ stages:
 
 - stage: Deploy
   displayName: 'Deploy Web App'
-  dependsOn: Test
+  dependsOn: Build
   condition: succeeded()
   jobs:
   - deployment: DeploymentJob
