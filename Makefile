@@ -9,4 +9,7 @@ test:
 lint:
 	pylint --disable=R,C,W0718 app_old.py
 
+format:
+	black *.py
+
 all: install lint test
