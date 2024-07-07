@@ -8,16 +8,19 @@ pool:
 
 variables:
   # Web app name
-  # webAppName: 'tbd'
+  webAppName: 'chawitc-dash-app-ml-devops'
 
   # Environment name
-  # environmentName: 'tbd'
+  environmentName: 'prd'
 
   # Project root folder. Point to the folder containing manage.py file.
   projectRoot: $(System.DefaultWorkingDirectory)
   
   # Python version: 3.8
   pythonVersion: '3.8'
+
+  # Azure Resource Manager connection created during pipeline creation
+  azureServiceConnectionId: 'tbd'
 
 # Define stages in the pipeline
 stages:
@@ -62,23 +65,43 @@ stages:
         make test
       workingDirectory: $(projectRoot)
       displayName: 'Run tests'
+    
+- stage: Archive
+  dependsOn: Test
+  jobs:
+  - job: ArchiveJob
+    steps:
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(projectRoot)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
 
-# - stage: Deploy
-#   dependsOn: Test
-#   condition: succeeded()
-#   jobs:
-#   - deployment: Deploy
-#     environment: 'production'
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - task: DownloadPipelineArtifact@2
-#             inputs:
-#               artifact: 'drop'
-#             displayName: 'Download Artifact'
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Upload package'
+      artifact: drop
 
-#           - script: |
-#               source antenv/bin/activate
-#               # Add deployment script here
-#             displayName: 'Deploy application'
+- stage: Deploy
+  dependsOn: Test
+  condition: succeeded()
+  jobs:
+  - deployment: DeployJob
+    environment: $(environmentName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App : dash-app-service'
+            inputs:
+              azureSubscription: $(azureServiceConnectionId)
+              appName: $(webAppName)
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
