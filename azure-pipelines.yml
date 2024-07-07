@@ -53,6 +53,7 @@ stages:
         make install
         make lint
         make format
+        git diff --exit-code  # Ensure no changes after formatting
       workingDirectory: $(projectRoot)
       displayName: 'Run lint tests and format'
 

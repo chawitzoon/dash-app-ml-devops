@@ -7,7 +7,7 @@ test:
 
 
 lint:
-	pylint --disable=R,C,W0718 app_old.py
+	pylint --disable=R,C,W0718 *.py
 
 format:
 	black *.py
