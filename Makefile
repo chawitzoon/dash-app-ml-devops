@@ -7,6 +7,6 @@ test:
 
 
 lint:
-	pylint --disable=R,C,W0718 app.py
+	pylint --disable=R,C,W0718 app_old.py
 
 all: install lint test
