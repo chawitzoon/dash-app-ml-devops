@@ -2,3 +2,7 @@
 
 ### Use Azure Pipelines to build and deploy a Python web app to Azure App Service
 https://learn.microsoft.com/en-us/azure/devops/pipelines/ecosystems/python-webapp?view=azure-devops&tabs=linux
+
+
+### Deployment Best Practices
+https://learn.microsoft.com/en-us/azure/app-service/deploy-best-practices#use-deployment-slots

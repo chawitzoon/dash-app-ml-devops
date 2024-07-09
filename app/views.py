@@ -10,7 +10,7 @@ LOG.setLevel(logging.INFO)
 @app.route("/")
 def home():
     html = (
-        "<h3>App Home: From Azure Pipelines (Continuous Delivery) updated version </h3>"
+        "<h3>App Home: From Azure Pipelines (Continuous Delivery) updated version git diff</h3>"
     )
     return html.format(format)
 
