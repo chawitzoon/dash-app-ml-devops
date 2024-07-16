@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Predict Next Price</title>
+</head>
+<body>
+    <h1>Predict Next Price</h1>
+    <form action="{{ url_for('predict') }}" method="post">
+        <label for="prices">Enter 7 lookback prices (comma-separated):</label>
+        <input type="text" id="prices" name="prices" required>
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>
