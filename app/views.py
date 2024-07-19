@@ -4,6 +4,10 @@ import requests
 import logging
 from . import app
 
+# for test
+import random
+from datetime import datetime
+
 LOG = create_logger(app)
 LOG.setLevel(logging.INFO)
 @app.route('/')
@@ -23,35 +27,26 @@ def predict():
 
     return jsonify({"result": result})
 
-# @app.route('/stock_data', methods=['GET'])
-# def stock_data():
-#     # Fetch real-time stock data from an API
-#     api_url = "https://api.example.com/stock/amazon"  # Replace with a real stock API endpoint
-#     response = requests.get(api_url)
-#     data = response.json()
-#     return jsonify(data)
+init_price = 120.0
 
 @app.route('/stock_data', methods=['GET'])
 def stock_data():
-    # Dummy data for testing
-    data = {
-        "timestamps": [
-            "2024-07-14T10:00:00Z",
-            "2024-07-14T11:00:00Z",
-            "2024-07-14T12:00:00Z",
-            "2024-07-14T13:00:00Z",
-            "2024-07-14T14:00:00Z",
-            "2024-07-14T15:00:00Z",
-            "2024-07-14T16:00:00Z"
-        ],
-        "prices": [
-            3300.00,
-            3310.50,
-            3325.75,
-            3330.25,
-            3320.00,
-            3315.50,
-            3305.00
-        ]
+    # Generate dummy OHLC data with timestamps
+    global init_price  # Declare init_price as global to modify it
+
+    # Update init_price
+    init_price = init_price + round(random.uniform(-10, 10), 2)
+    open_price = init_price + round(random.uniform(-15, 20), 2)
+    close_price = init_price + round(random.uniform(-15, 20), 2)
+    high = max(open_price, close_price) + round(random.uniform(5, 10), 2)
+    low = min(open_price, close_price) - round(random.uniform(5, 10), 2)
+    now = datetime.utcnow()
+    
+    ohlc_data = {
+        'timestamp': now.isoformat() + 'Z',
+        'open': open_price,
+        'high': high,
+        'low': low,
+        'close': close_price
     }
-    return jsonify(data)
+    return jsonify(ohlc_data)
