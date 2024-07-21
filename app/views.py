@@ -22,7 +22,7 @@ def index():
 def predict():
     prices = request.json.get("prices")
     payload = {"prices": prices}
-    api_url = os.getenv('PREDICT_API_URL', 'http://127.0.0.1:8080/predict_next_price')
+    api_url = os.getenv('PREDICT_API_URL', 'http://127.0.0.1:8080/predict_next_price') # also default value for local development
     try:
         response = requests.post(api_url, json=payload)
         response.raise_for_status()
