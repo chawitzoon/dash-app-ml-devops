@@ -2,6 +2,7 @@ from flask import request, render_template, jsonify
 from flask.logging import create_logger
 import requests
 import logging
+import os
 from . import app
 
 # for test
@@ -21,10 +22,9 @@ def index():
 def predict():
     prices = request.json.get("prices")
     payload = {"prices": prices}
+    api_url = os.getenv('PREDICT_API_URL', 'http://127.0.0.1:8080/predict_next_price')
     try:
-        response = requests.post(
-            "http://127.0.0.1:8080/predict_next_price", json=payload
-        )
+        response = requests.post(api_url, json=payload)
         response.raise_for_status()
         result = response.json().get("result")
     except requests.RequestException as e:
@@ -42,11 +42,11 @@ def stock_data():
     global init_price  # Declare init_price as global to modify it
 
     # Update init_price
-    init_price = init_price + round(random.uniform(-10, 10), 2)
-    open_price = init_price + round(random.uniform(-15, 20), 2)
-    close_price = init_price + round(random.uniform(-15, 20), 2)
-    high = max(open_price, close_price) + round(random.uniform(5, 10), 2)
-    low = min(open_price, close_price) - round(random.uniform(5, 10), 2)
+    open_price = init_price
+    close_price = init_price + round(random.uniform(-5, 6), 2)
+    high = max(open_price, close_price) + round(random.uniform(5, 5), 2)
+    low = min(open_price, close_price) - round(random.uniform(5, 5), 2)
+    init_price = close_price
     now = datetime.utcnow()
 
     ohlc_data = {
