@@ -1,4 +1,5 @@
-pytest
-pylint
-black
-Flask
+pylint==2.7.2
+pytest==6.2.2
+black==23.3.0
+Flask==2.2.5
+requests==2.31.0
